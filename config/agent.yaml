@@ -1,0 +1,37 @@
+# Agent Manifest — AgentRegistry entry point
+# AgentRegistry reads every key below at ROOT level. Nesting them under an
+# `agent:` block makes them invisible to the registry: namespace and enabled
+# fall back to defaults and name/version never resolve.
+id: "RET-C2-586"
+name: "Retail Supplier Lead Time Anomaly Detection & Supply Risk Alert"
+namespace: "ret"
+version: "0.1.0"
+enabled: true
+category: "Cat 2"
+industry: "RET"
+
+# Base pattern reference (L1-direct inheritance; not an import target)
+base_type: "ToolCallingAgent"
+
+# Entry point — a single dotted import path (module.Class), not a module:/class:
+# split. AgentRegistry does class.rsplit(".", 1) to get (module, class_name).
+class: "src.graph.graph.RETSupplierLeadTimeAnomalyAlertAgent"
+
+# Security
+required_trust_level: "INTERNAL"
+
+# Compile-time gates. Both lists are declared explicitly.
+# secrets: 本番クライアントの構築に必須（未設定時は設定エラーで停止する）。
+# extras: 空で正しい。起動時にプロバイダのクライアントを構築していない。
+requires:
+  secrets:
+    - AZURE_OPENAI_API_KEY
+    - AZURE_OPENAI_ENDPOINT
+    - AZURE_OPENAI_DEPLOYMENT
+    - "SUPPLIER_DB_TOKEN"
+    - "SUPPLIER_DB_URL"
+  extras:
+    - openai
+
+# Runtime parameters live in config/config.yaml. AgentRegistry loads that file
+# separately and passes its contents as Graph(config=...).
